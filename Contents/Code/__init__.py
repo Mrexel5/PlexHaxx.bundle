@@ -2,9 +2,9 @@ import os, time, random
 
 ####################################################################################################
 
-PREFIX = "/video/unsupportedappstore"
+PREFIX = "/video/plexhaxx"
 
-NAME = 'UnSupported AppStore'
+NAME = 'Plex Haxx'
 
 ART         = 'art-default.jpg'
 ICON        = 'icon-default.png'
@@ -12,7 +12,7 @@ PREFS_ICON  = 'icon-prefs.png'
 
 PLUGINS     = 'plugin_details.json'
 
-DEV_MODE    = False
+DEV_MODE    = True
 
 ####################################################################################################
 
@@ -25,14 +25,14 @@ def Start():
     
     #Check the list of installed plugins
     if Dict['Installed'] == None:
-        Dict['Installed'] = {'UnSupported Appstore' : {'lastUpdate': 'None', 'updateAvailable': 'False', 'installed': 'True'}}
+        Dict['Installed'] = {'Plex Haxx' : {'lastUpdate': 'None', 'updateAvailable': 'False', 'installed': 'True'}}
     else:
-        if not Dict['Installed']['UnSupported Appstore']['installed']:
-            Dict['Installed']['UnSupported Appstore']['installed'] = True
+        if not Dict['Installed']['Plex Haxx']['installed']:
+            Dict['Installed']['Plex Haxx']['installed'] = True
     
-    try: version = Dict['Installed']['UnSupported Appstore']['version']
+    try: version = Dict['Installed']['Plex Haxx']['version']
     except: version = 'unknown'
-    Logger('UnSupported Appstore version: %s' % version, force=True)
+    Logger('Plex Haxx version: %s' % version, force=True)
     Logger('Platform: %s %s' % (Platform.OS, Platform.OSVersion), force=True)
     Logger('Server: PMS %s' % Platform.ServerVersion, force=True) 
     
@@ -82,10 +82,10 @@ def ValidatePrefs():
         Dict.Reset() # This doesn't seem to work, but new values are set below anyways.
         Dict.Save()
         # Note: Setting lastUpdate to None causes an update to run. Which is probably a good thing if the Dict[] needs to be reset.
-        Dict['Installed'] = {'UnSupported Appstore' : {'lastUpdate': 'None', 'updateAvailable': 'False', 'installed': 'True'}}
+        Dict['Installed'] = {'Plex Haxx' : {'lastUpdate': 'None', 'updateAvailable': 'False', 'installed': 'True'}}
         Dict['plugins'] = LoadData()
         # Reset Prefs['clear_dict'] to false.
-        HTTP.Request('http://localhost:32400/:/plugins/com.plexapp.plugins.unsupportedappstore/prefs/set?clear_dict=False', immediate=True)
+        HTTP.Request('http://localhost:32400/:/plugins/com.plexapp.plugins.plexhaxx/prefs/set?clear_dict=False', immediate=True)
 
 @route(PREFIX + '/genre')
 def GenreMenu(genre):
@@ -105,7 +105,7 @@ def GenreMenu(genre):
     for plugin in plugins:
         if plugin['hidden'] == "True": continue ### Don't display plugins which are "hidden"
         else: pass
-        if plugin['title'] != "UnSupported Appstore":
+        if plugin['title'] != "Plex Haxx":
             if not Prefs['adult']:
                 if "Adult" in plugin['type']:
                     continue
@@ -124,7 +124,7 @@ def GenreMenu(genre):
                 oc.add(PopupDirectoryObject(key=Callback(PluginMenu, plugin=plugin), title=plugin['title'],
                     summary=subtitle + plugin['description'], thumb=R(plugin['icon'])))
     if len(oc) < 1:
-        return ObjectContainer(header=NAME, message='There are no plugins to display in the list: "%s"' % genre)
+        return ObjectContainer(header=NAME, message='There are no plugins in: "%s"' % genre)
     return oc
 
 @route(PREFIX + '/installed')
@@ -136,7 +136,7 @@ def InstalledMenu():
         summary = ''
         if Installed(plugin):
             if plugin['hidden'] == "True":
-                summary = 'No longer available through the Unsupported Appstore'
+                summary = 'No longer available through the Plex Haxx'
             elif Dict['Installed'][plugin['title']]['updateAvailable'] == "True":
                 summary = 'Update available'
             else: pass
@@ -171,7 +171,7 @@ def Installed(plugin):
             return False
     except:
         ### make sure the Appstore shows up in the list if it doesn't already ###
-        if plugin['title'] == 'UnSupported Appstore':
+        if plugin['title'] == 'Plex Haxx':
             Dict['Installed'][plugin['title']] = {"installed":"True", "lastUpdate":"None", "updateAvailable":"False"}
             Dict.Save()
         else:
@@ -231,7 +231,7 @@ def Install(plugin, version=None, initial_download=False):
 
         if not str(filename).endswith('/'):
             if not str(filename.split('/')[-1]).startswith('.'):
-                if plugin['title'] == 'UnSupported Appstore' and filename == '__init__.py' and Platform.OS == "Linux":
+                if plugin['title'] == 'Plex Haxx' and filename == '__init__.py' and Platform.OS == "Linux":
                     # set the __init__.py file aside and update it after all the others are done
                     init_path = filename
                 else:
@@ -403,10 +403,10 @@ def CheckForUpdates(install=False, return_message=False, plugin=None):
     #use the github commit feed for each installed plugin to check for available updates
     if plugin:
         if plugin['hidden'] == "true":
-            return ObjectContainer(header="Unsupported Appstore", message="%s : No longer supported. No updates." % plugin['title'])
+            return ObjectContainer(header="Plex Haxx", message="%s : No longer supported. No updates." % plugin['title'])
         GetRSSFeed(plugin=plugin, install=install)
         if return_message:
-            return ObjectContainer(header="Unsupported Appstore", message="%s : Up-to-date" % plugin['title'])
+            return ObjectContainer(header="Plex Haxx", message="%s : Up-to-date" % plugin['title'])
     else:
         @parallelize
         def GetUpdateList():
@@ -417,7 +417,7 @@ def CheckForUpdates(install=False, return_message=False, plugin=None):
                     if Installed(plugin):
                         GetRSSFeed(plugin=plugin, install=install)
         if return_message:
-            return ObjectContainer(header="Unsupported Appstore", message="Update check complete.")
+            return ObjectContainer(header="Plex Haxx", message="Update check complete.")
         else:
             return
 
@@ -440,14 +440,14 @@ def GetRSSFeed(plugin, install=False):
         else:
             version = Dict['Installed'][plugin['title']]['version']
             # compared stored version to latest commitHash
-            if version != commitHash: #if they don't match better update for good measure
+            if version != commitHash: #if they don't match update for good measure
                 Dict['Installed'][plugin['title']]['updateAvailable'] = "True"
         
 
     if Dict['Installed'][plugin['title']]['updateAvailable'] == "True":
         Logger(plugin['title'] + ': Update available', force=True)
         if install:
-            if plugin['title'] == 'UnSupported Appstore' and DEV_MODE:
+            if plugin['title'] == 'Plex Haxx' and DEV_MODE:
                 pass
             else:
                 Install(plugin, version=commitHash)
@@ -466,7 +466,7 @@ def GetRepo(plugin):
     elif repo.startswith("https://github.com/"):
         pass
     else:
-        Logger("Error in repo URL format. Please report this https://github.com/mikedm139/UnSupportedAppstore.bundle/issues", force=True)
+        Logger("Error in repo URL format. Please report this https://github.com/plexhaxx/plexhaxx.bundle/issues", force=True)
     
     if repo.endswith(".git"):
         repo = repo.split(".git")[0]
